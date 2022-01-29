@@ -16,8 +16,11 @@ import { useRouter } from "next/router";
 import { ADD_CATEGORY, GET_CATEGORIES } from "src/graphql/queries";
 import { useMutation } from "@apollo/client";
 import { CancelIcon } from "src/utils/icons";
+import { useSetRecoilState } from "recoil";
+import { loaderState } from "src/atoms/loader";
 
 const Add = () => {
+  const setLoaderState = useSetRecoilState(loaderState);
   const {
     register,
     handleSubmit,
@@ -27,7 +30,9 @@ const Add = () => {
   const { push } = useRouter();
 
   const onSubmit = async (form: any) => {
-    const { data } = await addCategory({
+    setLoaderState(true);
+
+    await addCategory({
       variables: {
         input: {
           ...form,

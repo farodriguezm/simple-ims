@@ -14,8 +14,12 @@ import { GET_CATEGORIES } from "src/graphql/queries";
 import { AddIcon, EditIcon, DeleteIcon } from "src/utils/icons";
 import Layout from "src/components/globals/Layout";
 import { useQuery } from "@apollo/client";
+import { useSetRecoilState } from "recoil";
+import { loaderState } from "src/atoms/loader";
+import { useEffect } from "react";
 
 const Index = () => {
+  const setLoaderState = useSetRecoilState(loaderState);
   const isTabletOrMobile = useMediaQuery("(max-width: 1224px)");
   const { loading, error, data } = useQuery(GET_CATEGORIES);
   const categories = data?.getCategories || [];
@@ -57,6 +61,11 @@ const Index = () => {
       renderCell: renderActionButtons,
     },
   ];
+
+  useEffect(() => {
+    setLoaderState(loading);
+    return () => {};
+  }, [loading]);
 
   return (
     <Layout>

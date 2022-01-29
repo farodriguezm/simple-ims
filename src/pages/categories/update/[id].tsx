@@ -19,8 +19,12 @@ import {
   GET_CATEGORY,
 } from "src/graphql/queries";
 import { CancelIcon, EditIcon } from "src/utils/icons";
+import { useSetRecoilState } from "recoil";
+import { loaderState } from "src/atoms/loader";
+import { useEffect } from "react";
 
 const Update = () => {
+  const setLoaderState = useSetRecoilState(loaderState);
   const {
     query: { id },
     push,
@@ -29,22 +33,32 @@ const Update = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm();
 
-  const { loading, error, data } = useQuery(GET_CATEGORY, {
+  const [updateCategory] = useMutation(UPDATE_CATEGORY);
+
+  const { loading } = useQuery(GET_CATEGORY, {
     variables: {
       input: {
-        id,
+        id: id ? id : "0",
       },
+    },
+    onCompleted: (data) => {
+      if (data.getCategory) {
+        setValue("name", data.getCategory.name, { shouldValidate: true });
+        setValue("description", data.getCategory.description, {
+          shouldValidate: true,
+        });
+      }
     },
   });
 
-  const [updateCategory] = useMutation(UPDATE_CATEGORY);
-  const category: Category = data?.getCategory || {};
-
   const onSubmit = async (form: any) => {
-    const { data } = await updateCategory({
+    setLoaderState(true);
+
+    await updateCategory({
       variables: {
         input: {
           ...form,
@@ -56,6 +70,11 @@ const Update = () => {
 
     push("/categories");
   };
+
+  useEffect(() => {
+    setLoaderState(loading);
+    return () => {};
+  }, [loading]);
 
   return (
     <Layout>
@@ -74,7 +93,7 @@ const Update = () => {
                     helperText={
                       errors.name && "Name is required and max length is 64"
                     }
-                    defaultValue={category.name}
+                    defaultValue=" "
                     {...register("name", { required: true, maxLength: 64 })}
                   />
                 </Box>
@@ -85,7 +104,7 @@ const Update = () => {
                     fullWidth
                     multiline
                     rows={3}
-                    defaultValue={category.description}
+                    defaultValue=" "
                     {...register("description")}
                   />
                 </Box>

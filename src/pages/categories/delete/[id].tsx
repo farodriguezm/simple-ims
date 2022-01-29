@@ -11,6 +11,8 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useRouter } from "next/router";
+import { useSetRecoilState } from "recoil";
+import { loaderState } from "src/atoms/loader";
 import Layout from "src/components/globals/Layout";
 import {
   DELETE_CATEGORY,
@@ -20,6 +22,7 @@ import {
 import { CancelIcon, DeleteIcon } from "src/utils/icons";
 
 const Delete = () => {
+  const setLoaderState = useSetRecoilState(loaderState);
   const isTabletOrMobile = useMediaQuery("(max-width: 1224px)");
   const {
     query: { id },
@@ -38,7 +41,9 @@ const Delete = () => {
   const category: Category = data?.getCategory || {};
 
   const handleDelete = async () => {
-    const { data } = await deleteCategory({
+    setLoaderState(true);
+
+    await deleteCategory({
       variables: {
         input: {
           id,
